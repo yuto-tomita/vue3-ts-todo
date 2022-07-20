@@ -33,7 +33,6 @@ module.exports = {
     'func-call-spacing': ['error', 'never'],
     'indent': ['error', 2],
     'key-spacing': ['error', { 'beforeColon': false }],
-    'max-len': ['error', { 'code': 70 }],
     'no-multi-spaces': 'error',
     'no-multiple-empty-lines': 'error',
     'no-whitespace-before-property': 'error',
