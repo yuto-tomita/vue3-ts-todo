@@ -18,6 +18,6 @@ const inputState = computed({
   <input
     v-model="inputState"
     type="date"
-    class="py-1 w-full h-7 text-sm border border-black border-solid outline-gray-600 select-none"
+    class="h-7 w-full select-none border border-solid border-black py-1 pl-2 text-sm outline-gray-600"
   >
 </template>
