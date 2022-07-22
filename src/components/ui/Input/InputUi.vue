@@ -10,7 +10,8 @@ const emits = defineEmits(['update:modelValue'])
 // propsで受け取った値を直接変更してはいけないルールがあるため、propsの値を初期値にして、変更を検知したらemitする
 const inputState = computed({
   get: () => props.modelValue,
-  set: () => emits('update:modelValue')
+  // v-modelはv-bind:modelValueと@update:modelValueの糖衣構文なので、'@update:modelValue'という値でemitする
+  set: (value: string) => emits('update:modelValue', value)
 })
 </script>
 
