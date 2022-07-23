@@ -19,6 +19,6 @@ const inputState = computed({
   <input
     v-model="inputState"
     type="text"
-    class="h-7 w-full border border-solid border-gray-500 py-1 pl-2 text-sm outline-gray-800"
+    class="h-7 w-full rounded-md border border-solid border-gray-500 py-1 pl-2 text-sm outline-gray-800"
   >
 </template>
