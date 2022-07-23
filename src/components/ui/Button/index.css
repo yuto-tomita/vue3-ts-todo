@@ -1,0 +1,8 @@
+.primary {
+	@apply border-black hover:bg-black hover:text-white
+}
+
+/* @applyと記述することで特定のclass名を定義しながらtailwindのstyleを付与することができる */
+.danger {
+	@apply border-red-600 text-red-600 hover:bg-red-600 hover:text-white
+}
