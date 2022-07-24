@@ -1,21 +1,28 @@
 <script setup lang="ts">
 import { Modal } from '@/components/common'
 import { Input, Datepick, Button } from '@/components/ui'
-import { reactive, computed, defineEmits } from 'vue'
-import type { Todo, TodoForm } from '@/components/todo/types'
+import { reactive, defineEmits } from 'vue'
+import type { TodoForm } from '@/components/todo/types'
 
 interface DetailSettingModalProps {
   todo: TodoForm
 }
 
 const props = defineProps<DetailSettingModalProps>()
-const emits = defineEmits(['update:modelValue'])
+const emits = defineEmits(['update:modelValue', 'postTodo', 'modalClose'])
 
 const detailTodo = reactive<TodoForm>({
   todo: props.todo.todo,
   deadline: props.todo.deadline,
   status: props.todo.status
 })
+
+const onClickDecision = () => {
+  emits('postTodo', detailTodo)
+}
+const onClickCancel = () => {
+  emits('modalClose')
+}
 </script>
 
 <template>
@@ -56,12 +63,13 @@ const detailTodo = reactive<TodoForm>({
 
     <!-- フォームとの位置を統一させるために、calcを使ってlabelのwidth + フォームのwidthの合計値をwidthに設定 -->
     <div class="mt-8 w-[calc(60%_+_25%)] text-right">
-      <Button>
+      <Button @click="onClickDecision">
         決定
       </Button>
       <Button
         variant="danger"
         class="ml-4"
+        @click="onClickCancel"
       >
         キャンセル
       </Button>

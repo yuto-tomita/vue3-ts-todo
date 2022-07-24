@@ -1,1 +1,1 @@
-export { default as DetailSettingModal } from './DetailSetting/DetailSettingModal.vue'
+export { default as DetailSettingModal } from './DetailSetting'
