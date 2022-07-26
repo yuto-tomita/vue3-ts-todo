@@ -10,7 +10,7 @@ const emits = defineEmits(['update:modelValue'])
 
 const inputState = computed({
   get: () => props.modelValue,
-  set: () => emits('update:modelValue')
+  set: (value: string) => emits('update:modelValue', value)
 })
 </script>
 
