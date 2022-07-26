@@ -26,7 +26,7 @@ const onClickCancel = () => {
 </script>
 
 <template>
-  <Modal>
+  <Modal @close="onClickCancel">
     <h1 class="my-4 text-2xl font-bold">
       詳細設定
     </h1>
