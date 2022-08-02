@@ -1,15 +1,15 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
-import { Input, Button, Card } from '@/components/ui'
+import { Input, Button } from '@/components/ui'
 import { Modal } from '@/components/common'
-import { DetailSettingModal } from '@/components/todo'
+import { DetailSettingModal, TodoList } from '@/components/todo'
 import type { Todo, TodoForm } from '@/components/todo/types'
 
 const isModalOpen = ref(false)
 
 // reactiveを使用することでリアクティブに動作するようになる、refと違う点はvue2のdataプロパティのように記述できる点と、分割代入をすることでリアクティブ性が失われる点()
 const todoForm = reactive<TodoForm>({
-  todo: 'aaa',
+  todo: 'aaa'.repeat(500),
   deadline: '',
   status: 'progress'
 })
@@ -87,7 +87,10 @@ const saveTodo = () => {
 
       <!-- 子コンポーネントでmodelValueという値を受け取るように記述しているため、親コンポーネントでv-modelで管理できるようになる -->
       <!-- 親コンポーネントでv-model管理のメリットとして、データフローが追いやすくなる、データ管理の容易さ、簡潔にかけると言ったメリットがある -->
-      <Input v-model="todoForm.todo" />
+      <Input
+        v-model="todoForm.todo"
+        class="w-full"
+      />
     </div>
 
     <div class="ml-2">
@@ -103,24 +106,7 @@ const saveTodo = () => {
     </div>
   </div>
 
-  <div class="flex w-full flex-wrap pl-40">
-    <div
-      v-for="(todo, index) in todos"
-      :key="index"
-      class="my-3 mx-4"
-    >
-      <Card>
-        <template #title>
-          <!-- コンポーネントインスタンスをバインドさせる構文であるMustache(マスタッシュ)構文 -->
-          <!-- todoインスタンスが書き変わるたびに、新しい値に起き変わる -->
-          <!-- マスタッシュ構文によって出力されるHTMLは"ただのテキスト"として出力される -->
-          {{ todo.todo }}
-          <!-- HTMLとして出力したい場合は `v-htmlディレクティブ` を使用する -->
-          <!-- <span v-html="todo.todo" /> -->
-        </template>
-      </Card>
-    </div>
-  </div>
+  <TodoList :todo-list="todos" />
 </template>
 
 <!-- Vueでtemplateを書いていく上でのアンチパターン -->
