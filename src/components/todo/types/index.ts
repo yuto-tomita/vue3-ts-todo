@@ -8,12 +8,24 @@
 // 	deadline: string
 // 	status: 'progress'
 // }
+
+// Statusの型を列挙したもの(Enumみたいなもの)
+export const Status = {
+  PROGRESS: 1,
+  COMPLETE: 2,
+} as const
 export interface Todo {
 	id: number
   todo: string
   deadline: string
-  status: 'progress'
+  // 下記のように記述することでstatusは 1 | 2(Union型)という型が生成される
+  status: typeof Status[keyof typeof Status]
 }
+
+// Union型
+// number | undefined, 'huga' | 'hoge'みたいに、AまたはBのような型を生成できる
+// 記述した型以外の代入はできない
+
 
 // Omitはオブジェクト型から特定のプロパティを除外した型を生成する
 // 下記はTodo型からidプロパティを除外したもの(idは入力して管理したくないため)
