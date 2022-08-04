@@ -30,6 +30,8 @@ export interface Todo {
 // 下記はTodo型からidプロパティを除外したもの(idは入力して管理したくないため)
 export type TodoForm = Omit<Todo, 'id'>
 
+export type TodoErrorMessage = Pick<Todo, 'todo'>
+
 // objectの各プロパティや変数には基本的にプリミティブ型を付与していくことになる
 // プリミティブには, 文字列, 真偽値, BigInt, null, undefined, Symbolの七種類が存在する(Symbol型は複雑なためMDNのドキュメントを参照してほしい https://developer.mozilla.org/ja/docs/Web/JavaScript/Reference/Global_Objects/Symbol)
 
