@@ -17,7 +17,6 @@ export const Status = {
 export interface Todo {
 	id: number
   todo: string
-  deadline: string
   // 下記のように記述することでstatusは 1 | 2(Union型)という型が生成される
   status: typeof Status[keyof typeof Status]
 }
