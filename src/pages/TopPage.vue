@@ -6,16 +6,23 @@
 import { reactive, ref } from 'vue'
 import { Input, Button } from '@/components/ui'
 import { TodoList } from '@/components/todo'
-import { Todo, TodoForm, Status } from '@/components/todo/types'
+import {
+  Todo,
+  TodoForm,
+  Status,
+  TodoErrorMessage
+} from '@/components/todo/types'
 
-// reactiveを使用することでリアクティブに動作するようになる、refと違う点はvue2のdataプロパティのように記述できる点と、分割代入をすることでリアクティブ性が失われる点()
+// reactiveを使用することでリアクティブに動作するようになる。refと違う点はvue2のdataプロパティのように記述できる点と、分割代入をすることでリアクティブ性が失われる点、reactiveに動作させるための内部ロジックが違う
 const todoForm = reactive<TodoForm>({
   todo: 'aaa'.repeat(50),
   status: Status.PROGRESS
 })
 // refを使用した値はリアクティブに動作するようになる。`.value`にアクセスすることで`todos`の値にアクセスすることができる。
 const todos = ref<Todo[]>([])
-
+const error = ref<TodoErrorMessage>({
+  todo: ''
+})
 // ジェネリクスに型を指定することができる
 // 当然stringで指定しているため、string以外の型を代入することができない
 // const test = ref<string>('')
@@ -61,14 +68,32 @@ const updateTodoStatus = (event: number) => {
   }
 }
 
+/** 投稿フォームが空の状態では投稿できないようにする */
+const formValidate = () => {
+  if (!todoForm.todo) {
+    error.value.todo = '内容を入力してください'
+
+    // 分割代入を使って条件分岐をするために、オブジェクト形式で値を返却する
+    return { invalid: true }
+  } else {
+    return { invalid: false }
+  }
+}
+
 /** ユーザーが入力したTodoをrefに保存する */
 const saveTodo = () => {
-  // refでtodosの値を管理しているため、todosの変更を検知したら連動してtodosの内容が画面に描画される
-  todos.value.push({
-    id: todos.value.length + 1,
-    todo: todoForm.todo,
-    status: todoForm.status
-  })
+  // 分割代入(https://developer.mozilla.org/ja/docs/Web/JavaScript/Reference/Operators/Destructuring_assignment)
+  // formValidateから返却されるオブジェクトの値を取り出して、別の変数として利用できる
+  const { invalid } = formValidate()
+
+  if (!invalid) {
+    // refでtodosの値を管理しているため、todosの変更を検知したら連動してtodosの内容が画面に描画される
+    todos.value.push({
+      id: todos.value.length + 1,
+      todo: todoForm.todo,
+      status: todoForm.status
+    })
+  }
 
   // 投稿したらフォームを空にする
   todoForm.todo = ''
@@ -90,6 +115,7 @@ const saveTodo = () => {
       <Input
         v-model="todoForm.todo"
         class="w-full"
+        :error-message="error['todo']"
       />
     </div>
 
