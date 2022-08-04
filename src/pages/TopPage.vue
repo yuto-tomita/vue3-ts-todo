@@ -1,28 +1,20 @@
+<!-- setupにする利点
+  - setup関数で必要なプロパティのreturnがいらない
+  - componentのimport時にcomponentsプロパティが必要ない
+  definePropsでpropsの定義ができる。interfaceの定義でpropsが登録できる等々たくさん -->
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
 import { Input, Button } from '@/components/ui'
-import { Modal } from '@/components/common'
-import { DetailSettingModal, TodoList } from '@/components/todo'
-import type { Todo, TodoForm } from '@/components/todo/types'
-
-const isModalOpen = ref(false)
+import { TodoList } from '@/components/todo'
+import { Todo, TodoForm, Status } from '@/components/todo/types'
 
 // reactiveを使用することでリアクティブに動作するようになる、refと違う点はvue2のdataプロパティのように記述できる点と、分割代入をすることでリアクティブ性が失われる点()
 const todoForm = reactive<TodoForm>({
-  todo: 'aaa'.repeat(500),
-  deadline: '',
-  status: 'progress'
+  todo: 'aaa'.repeat(50),
+  status: Status.PROGRESS
 })
 // refを使用した値はリアクティブに動作するようになる。`.value`にアクセスすることで`todos`の値にアクセスすることができる。
 const todos = ref<Todo[]>([])
-
-const openModal = () => {
-  isModalOpen.value = true
-}
-
-const closeModal = () => {
-  isModalOpen.value = false
-}
 
 // ジェネリクスに型を指定することができる
 // 当然stringで指定しているため、string以外の型を代入することができない
@@ -35,21 +27,38 @@ const closeModal = () => {
 // test.value = {}
 // test.value = 'sample'
 
-// setupにする利点
-// - setup関数で必要なプロパティのreturnがいらない
-// - componentのimport時にcomponentsプロパティが必要ない
-// definePropsでpropsの定義ができる。interfaceの定義でpropsが登録できる等々たくさん
+// 第一引数に子コンポーネント側のemitの第二引数に指定した、受け取ることができる
+const deleteTodo = (event: number) => {
+  todos.value = todos.value.filter(val => val.id !== event)
+}
 
-/** 詳細Modalから送られてくるTodoの内容をもとにformTodo変数を更新する */
-const addTodo = (value: TodoForm) => {
-  console.log(value)
-  todoForm.deadline = value.deadline
-  todoForm.status = value.status
-  todoForm.todo = value.todo
+const updateTodoStatus = (event: number) => {
+  // findIndexでテスト関数に一致したオブジェクトのindex(添字)を取得する
+  const todoIndex = todos.value.findIndex(val => val.id === event)
 
-  saveTodo()
+  // チェックアイコンをクリックしたら、statusを反転させる
+  if (todos.value[todoIndex].status === Status.COMPLETE) {
+    todos.value[todoIndex] = {
+      // spread構文(...)を使用すると、オブジェクトや配列の値を展開させることができる。
+      // 同一プロパティがあった場合、そのプロパティも更新する特性を持っている
+      ...todos.value[todoIndex],
+      status: Status.PROGRESS
+    }
 
-  closeModal()
+    // これは上記のspread構文を使用しなかった場合の記述方法
+
+    // todos.value[todoIndex] = {
+    //   deadline: todos.value[todoIndex].deadline,
+    //   id: todos.value[todoIndex].id,
+    //   todo: todos.value[todoIndex].todo,
+    //   status: Status.PROGRESS
+    // }
+  } else {
+    todos.value[todoIndex] = {
+      ...todos.value[todoIndex],
+      status: Status.COMPLETE
+    }
+  }
 }
 
 /** ユーザーが入力したTodoをrefに保存する */
@@ -58,30 +67,21 @@ const saveTodo = () => {
   todos.value.push({
     id: todos.value.length + 1,
     todo: todoForm.todo,
-    deadline: todoForm.deadline,
     status: todoForm.status
   })
 
+  // 投稿したらフォームを空にする
   todoForm.todo = ''
-  todoForm.deadline = ''
 }
 </script>
 
 <!-- templateに記述されているHTMLはVueのRender関数によってVNode(Virtual Node(仮想DOM))を生成し、DOMに変換される -->
 <template>
-  <Modal v-if="isModalOpen">
-    <DetailSettingModal
-      :todo="todoForm"
-      @post-todo="addTodo"
-      @modal-close="closeModal"
-    />
-  </Modal>
-
   <h1 class="my-8 text-center text-3xl font-bold">
-    PL Vue + TS Study TODO App
+    PL Frontend Study - Vue + TS  TODO APP
   </h1>
 
-  <div class="flex items-center justify-center">
+  <div class="flex w-11/12 items-center justify-center">
     <div class="mr-2 flex w-4/12 whitespace-nowrap">
       <span class="mr-1">やること</span>
 
@@ -94,19 +94,18 @@ const saveTodo = () => {
     </div>
 
     <div class="ml-2">
-      <Button @click="openModal">
-        詳細設定
-      </Button>
-    </div>
-
-    <div class="ml-2">
       <Button @click="saveTodo">
         投稿
       </Button>
     </div>
   </div>
-
-  <TodoList :todo-list="todos" />
+  <!-- @* はv-on:* のショートハンド記法　子コンポーネント側でemitしたイベントを発火させることができる -->
+  <!-- 子コンポーネントでの、×アイコンをクリックした時に、TODOを消す処理を発火させる -->
+  <TodoList
+    :todo-list="todos"
+    @on-delete="deleteTodo"
+    @on-complete="updateTodoStatus"
+  />
 </template>
 
 <!-- Vueでtemplateを書いていく上でのアンチパターン -->
@@ -127,6 +126,7 @@ const saveTodo = () => {
 <!-- JavaScript式を何でもかんでもMethodsプロパティで実行させる -->
 
 <!-- 確かにComputedもMethodsも式が同じなら同じ値を返します。しかし、何でもかんでもMethodsで実行させるのではなく、computedを使用しましょう。使える場面ならばcomputedを極力使えるようにしましょう -->
-<!-- computedは結果をキャッシュするという特性を持っています。一回実行して、算出された値が同じならば関数を再実行しないでそのまま値を返します。 -->
-<!-- 対してMethodsは呼ばれるごとに関数を実行させてしまいます。これはパフォーマンス上良くないです。実行する必要がないのに実行させてるわけですから。 -->
 
+<!-- computedは結果をキャッシュするという特性を持っています。一回実行して、算出された値が同じならば関数を再実行しないでそのまま値を返します。 -->
+
+<!-- 対してMethodsは呼ばれるごとに関数を実行させてしまいます。これはパフォーマンス上良くないです。実行する必要がないのに実行させてるわけですから。 -->
