@@ -1,16 +1,21 @@
 <script setup lang="ts">
-import { defineProps, defineEmits, computed } from 'vue'
+import { defineProps, defineEmits, computed, ref } from 'vue'
 import { Todo, Status } from '@/components/todo/types'
 import { CheckIcon, XIcon } from '@heroicons/vue/solid'
+import { Input } from '@/components/ui'
 
 interface TodoListProps {
 	todoList: Todo[]
 }
-const props = defineProps<TodoListProps>()
 
+const props = defineProps<TodoListProps>()
 // emitsの型指定
 // onDeleteイベントを発火するにはnumber型のidプロパティが必要になる
-const emits = defineEmits<{(e: 'onDelete', id: number): void, (e: 'onComplete', id: number): void
+// eslint-disable-next-line func-call-spacing
+const emits = defineEmits<{
+  (e: 'onDelete', id: number): void,
+  (e: 'onComplete', id: number): void,
+  (e: 'onUpdate', event: { todo: string, id: number }): void
 }>()
 
 const findTodo = (id: number) => {
@@ -29,7 +34,17 @@ const checkLine = computed(() => {
   return (id: number) => {
     return findTodo(id)?.status === Status.COMPLETE ? 'line-through' : ''
   }
-}) 
+})
+
+const isDisplayUpdateForm = ref<Record<number, boolean>>({})
+const showUpdateForm = (id: number) => {
+  isDisplayUpdateForm.value = {
+    [id]: true
+  }
+}
+const onEnter = (id: number) => {
+  isDisplayUpdateForm.value[id] = false
+}
 
 const onClickDeleteIcon = (id: number) => {
   // error!
@@ -41,6 +56,15 @@ const onClickDeleteIcon = (id: number) => {
 
 const onClickCompleteIcon = (id: number) => {
   emits('onComplete', id)
+}
+
+const onUpdateTodo = (value: string, id: number) => {
+  if (value) {
+    emits('onUpdate', {
+      todo: value,
+      id
+    })
+  }
 }
 </script>
 
@@ -60,9 +84,25 @@ const onClickCompleteIcon = (id: number) => {
       >
         <CheckIcon class="m-auto h-full w-5 text-white" />
       </div>
-      <p :class="`select-none text-base overflow-x-auto py-3 ${checkLine(todo.id)}`">
+
+      <!-- v-if と v-showの使い分け -->
+      <!-- 頻繁に要素を切り替えるという場合はv-show(v-showはあくまで要素を隠すdisplay: hiddenをしているだけのため、v-ifと比べると、より高い描画性能がある) -->
+      <p
+        v-show="!isDisplayUpdateForm[todo.id]"
+        :class="`select-none text-base overflow-x-auto py-3 ${checkLine(todo.id)}`"
+        @dblclick="showUpdateForm(todo.id)"
+      >
         {{ todo.todo }}
       </p>
+
+      <Input
+        v-show="isDisplayUpdateForm[todo.id]"
+        :model-value="todo.todo"
+        class="py-3"
+        @update:model-value="onUpdateTodo($event, todo.id)"
+        @keydown.enter.prevent="onEnter(todo.id)"
+      />
+      
 
       <XIcon
         class="absolute right-4 top-7 h-6 cursor-pointer"
