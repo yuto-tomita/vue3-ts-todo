@@ -39,35 +39,6 @@ const deleteTodo = (event: number) => {
   todos.value = todos.value.filter(val => val.id !== event)
 }
 
-const updateTodoStatus = (event: number) => {
-  // findIndexでテスト関数に一致したオブジェクトのindex(添字)を取得する
-  const todoIndex = todos.value.findIndex(val => val.id === event)
-
-  // チェックアイコンをクリックしたら、statusを反転させる
-  if (todos.value[todoIndex].status === Status.COMPLETE) {
-    todos.value[todoIndex] = {
-      // spread構文(...)を使用すると、オブジェクトや配列の値を展開させることができる。
-      // 同一プロパティがあった場合、そのプロパティも更新する特性を持っている
-      ...todos.value[todoIndex],
-      status: Status.PROGRESS
-    }
-
-    // これは上記のspread構文を使用しなかった場合の記述方法
-
-    // todos.value[todoIndex] = {
-    //   deadline: todos.value[todoIndex].deadline,
-    //   id: todos.value[todoIndex].id,
-    //   todo: todos.value[todoIndex].todo,
-    //   status: Status.PROGRESS
-    // }
-  } else {
-    todos.value[todoIndex] = {
-      ...todos.value[todoIndex],
-      status: Status.COMPLETE
-    }
-  }
-}
-
 /** 投稿フォームが空の状態では投稿できないようにする */
 const formValidate = () => {
   if (!todoForm.todo) {
@@ -97,6 +68,45 @@ const saveTodo = () => {
 
   // 投稿したらフォームを空にする
   todoForm.todo = ''
+}
+
+const switchTodoStatus = (event: number) => {
+  // findIndexでテスト関数に一致したオブジェクトのindex(添字)を取得する
+  const todoIndex = todos.value.findIndex(val => val.id === event)
+
+  // チェックアイコンをクリックしたら、statusを反転させる
+  if (todos.value[todoIndex].status === Status.COMPLETE) {
+    todos.value[todoIndex] = {
+      // spread構文(...)を使用すると、オブジェクトや配列の値を展開させることができる。
+      // 同一プロパティがあった場合、そのプロパティも更新する特性を持っている
+      ...todos.value[todoIndex],
+      status: Status.PROGRESS
+    }
+
+    // これは上記のspread構文を使用しなかった場合の記述方法
+
+    // todos.value[todoIndex] = {
+    //   deadline: todos.value[todoIndex].deadline,
+    //   id: todos.value[todoIndex].id,
+    //   todo: todos.value[todoIndex].todo,
+    //   status: Status.PROGRESS
+    // }
+  } else {
+    todos.value[todoIndex] = {
+      ...todos.value[todoIndex],
+      status: Status.COMPLETE
+    }
+  }
+}
+
+const updateTodoValue = (event: { todo: string, id: number }) => {
+  // findIndexでテスト関数に一致したオブジェクトのindex(添字)を取得する
+  const todoIndex = todos.value.findIndex(val => val.id === event.id)
+
+  todos.value[todoIndex] = {
+    ...todos.value[todoIndex],
+    todo: event.todo
+  }
 }
 </script>
 
@@ -130,7 +140,8 @@ const saveTodo = () => {
   <TodoList
     :todo-list="todos"
     @on-delete="deleteTodo"
-    @on-complete="updateTodoStatus"
+    @on-complete="switchTodoStatus"
+    @on-update="updateTodoValue"
   />
 </template>
 
